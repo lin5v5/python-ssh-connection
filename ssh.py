@@ -1,5 +1,7 @@
+# -*- coding: utf8 -*-
 import paramiko
-import tkinter
+#import tkinter
+from tkinter import  *
 
 ##建立ssh连接
 def Myssh(hostname,username,password):
@@ -13,9 +15,13 @@ def Myssh(hostname,username,password):
 
 ##发送命令
 def send_command(cmd):
-    result = []
+    #for m in cmd:
     stdin, stdout, stderr = ssh.exec_command(cmd)
-    print(stdout.read())
+    #print("command is ",cmd)
+    result = []
+    for line in stdout.readlines():
+        result.append(line)
+    return result
 
 ##上传文件
 def upload():
@@ -35,24 +41,44 @@ def download():
 def quit_ssh():
     ssh.close()
 
-if __name__ == '__main__':
+def MyUI():
+    ##窗口化
+    top = Tk()
+    top.title("Myssh")
+    top.geometry('800x400')  # 设置了主窗口的初始大小\
 
+    label = Label(top, text='Myssh', font='Helvetica -12 bold').pack()
+
+    frm = Frame(top)
+    Label(frm, text='input you command:', font='Helvetica -10 bold').grid(row=0)
+    Label(frm, text='ssh result:', font='Helvetica -10 bold').grid(row=1)
+    var1 = StringVar()
+    e1 = Entry(frm, textvariable=var1)
+    e2 = Text(frm)
+    e1.grid(row=0, column=1)
+    e2.grid(row=1, column=1)
+
+    def read_command():
+        cmd = (var1.get())
+        result = send_command(cmd)
+        for i in result:
+            e2.insert(1.0,i)
+    Button(frm, text='commit', command=read_command).grid(row=0, column=3)
+    frm.pack()
+
+    top.mainloop()
+
+
+if __name__ == '__main__':
     #cmd = 'ps -ef|grep src'
-    cmd = 'cat /proc/loadavg'
     hostname = '10.30.51.230'
     username = 'root'
     password = '123456'
     Myssh(hostname,username,password)
-    send_command(cmd)
+    MyUI()
+    #send_command(cmd)
     #Mytransport(hostname,username,password)
-    download()
+    #download()
     quit_ssh()
 
-    """
-    ##窗口化
-    top = tkinter.Tk()
-    top.geometry('600x400')   #设置了主窗口的初始大小
-    label = tkinter.Label(top, text='Myssh',font='Helvetica -12 bold')
-    label.pack()
-    top.mainloop()
-    """
+
